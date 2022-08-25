@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<meta name="robots" content="noindex,nofollow">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認証(テスト)</title>
+</head>
+<body>
+<div class="container">
+    <p id="message">こんにちは○○さん</p>
+    <input type="text" id="token" name="token" hidden>
+    <input type="text" id="shopId" name="shopId" hidden>
+
+    <label>名前</label>
+    <input type="text" id="name" name="name">
+    <br>
+    <label>電話番号(どちらか必須)</label>
+    <input type="text" id="tel" name="tel">
+    <br>
+    <label>メールアドレス(どちらか必須)</label>
+    <input type="text" id="mail" name="mail">
+    <br>
+
+    <label>希望すること</label>
+    <br>
+    <input type="checkbox" id="buy" name="buy">
+    <label for="buy">購入検討</label>
+
+    <input type="checkbox" id="sel" name="sel">
+    <label for="sel">売却検討</label>
+
+    <input type="checkbox" id="other" name="other">
+    <label for="other">その他</label>
+
+    <br>
+    <label>LINE ID(後で非表示にする</label>
+    <input type="text" id="lineId" name="lineId">
+    <br>
+
+
+    <br>
+
+
+    <button type="button" onclick="send()">送信</button>
+</div>
+
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+    // URLを取得
+    const url = new URL(window.location.href);
+
+    // URLSearchParamsオブジェクトを取得
+    const params = url.searchParams;
+
+    const liffId = "1657179501-R1BNV4Vw"; // LIFF ID
+
+    // Initialize LIFF app
+    liff.init({liffId: liffId})
+      .then(() => {
+          if (!liff.isInClient() && !liff.isLoggedIn()) {
+              window.alert("LINEアカウントにログインしてください。");
+              liff.login({redirectUri: location.href});
+          }
+
+          // 開発時のみ出力
+          const tokenElement = document.getElementById("token");
+          tokenElement.value = liff.getIDToken();
+
+          const shopIdElement = document.getElementById("shopId");
+          shopIdElement.value = params.get('shopId');
+
+          liff.getProfile().then(function (result) {
+              const messageElement = document.getElementById("message");
+              messageElement.textContent = result.displayName + "さん";
+
+              const lineIdElement = document.getElementById("lineId");
+              lineIdElement.value = result.userId;
+
+          });
+      })
+      .catch((err) => {
+          console.log('LIFFアプリの初期化に失敗しました', err);
+      });
+
+    function send() {
+        liff.closeWindow();
+    }
+
+    // 認証が完了したら「認証が完了しました」→ そして、LIFFアプリを閉じる処理も必要
+    // life.closewindow() でLIFFの画面を閉じることができる
+
+</script>
+</body>
+</html>
